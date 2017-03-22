@@ -1,0 +1,23 @@
+{
+  "name": "tiny-react",
+  "version": "0.0.2",
+  "description": "A tiny react-like lib",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SunHuawei/TinyReact.git"
+  },
+  "keywords": [
+    "React",
+    "React-like"
+  ],
+  "author": "SunHuawei",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/SunHuawei/TinyReact/issues"
+  },
+  "homepage": "https://github.com/SunHuawei/TinyReact#readme"
+}

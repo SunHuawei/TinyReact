@@ -1,0 +1,58 @@
+<div id='app'></div>
+<script src='index.js'></script>
+<script>
+  let app = document.getElementById('app')
+
+  // renderDOM(createVDOM('div', {}, 'Hello VDOM'), app)
+  let h = createVDOM
+  let name = 'stranger'
+  function rerender() {
+    let invalid = name.length > 15
+    renderDOM(
+      h('select',
+        {
+          value: 'all'
+        },
+        h('option', {value: 'article'}, 'article'),
+        h('option', {value: 'answer'}, 'answer'),
+        h('option', {value: 'all'}, 'all')
+      ),
+      // createVDOM(
+      //   'div',
+      //   {
+      //     className: 'form' + (invalid ? ' invalid': '')
+      //   },
+      //   createVDOM(
+      //     'input',
+      //     {
+      //       value: name,
+      //       oninput: (e) => {
+      //         name = e.target.value
+      //         rerender()
+      //       }
+      //     }
+      //   ),
+      //   createVDOM(
+      //     'div',
+      //     {
+      //       className: 'form' + (invalid ? ' invalid': '')
+      //     },
+      //     'Hello ',
+      //     createVDOM(
+      //       'span', {}, name
+      //     )
+      //   ),
+      //   invalid ? createVDOM(
+      //     'div',
+      //     {
+      //       className: 'warn'
+      //     },
+      //     'Name is too long'
+      //   ) : ''
+      // ),
+      app
+    )
+  }
+
+  rerender()
+</script>
