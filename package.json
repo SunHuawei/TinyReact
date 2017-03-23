@@ -1,7 +1,7 @@
 {
   "name": "tiny-react",
   "version": "0.0.2",
-  "description": "A tiny react-like lib",
+  "description": "A tiny react-like lib, aim to understand how react works",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
