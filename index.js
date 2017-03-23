@@ -11,12 +11,13 @@ function createVDOM(tag, props, ...children) {
 
 function renderDOM(nextVDOM, parent) {
   let prevVDOM = parent._vDOM
+  parent._vDOM = nextVDOM
   let patches = diff(prevVDOM, nextVDOM, parent)
+  console.log(patches) // Show what patches will be applied
   patch(patches)
 }
 
 function diff(prevVDOM, nextVDOM, parent) {
-  parent._vDOM = nextVDOM
   if (prevVDOM && nextVDOM) {
     nextVDOM._dom = prevVDOM._dom
   }
@@ -45,7 +46,11 @@ function diff(prevVDOM, nextVDOM, parent) {
     } else {
       diffs.push({type: 'update', prevVDOM, nextVDOM, parent})
     }
-  } else {
+  } else if (prevVDOM instanceof String && nextVDOM instanceof String) {
+    if (prevVDOM.toString() !== nextVDOM.toString()) {
+      diffs.push({type: 'update', prevVDOM, nextVDOM, parent})
+    }
+  } else if (prevVDOM !== nextVDOM) {
     diffs.push({type: 'update', prevVDOM, nextVDOM, parent})
   }
 
