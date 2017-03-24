@@ -1,148 +1,231 @@
-我们尝试实现一个React-like库 -- tiny-react
+TinyReact是一个React-like库，旨在学习和理解React，并对vDOM有一个完整的认识。
 
-核心概念是增量更新。即如果只有少量元素变化，则只需要对有变化的部分更新。具体概念有：
-1. 虚拟DOM(Virtual DOM或vDOM)；一个树状结构，用以对应实际DOM。需要改变DOM时，只需要操作vDOM，tiny-react会做增量更新。
-2. diff&patch；对新旧vDOM做diff，得到patches，再在当前的DOM上打补丁（patch）（可参考git的diff&patch加深理解）。
+TinyReact绝大部分思路来源于[Building Your Own React Clone in Five Easy Steps](https://blog.javascripting.com/2016/10/05/building-your-own-react-clone-in-five-easy-steps/)。实现上略有区别。
 
+## 前言
 
+React的核心概念是增量更新。也就是说在初始化时会构建整个DOM Tree。之后如果有任何数据变化时，只需要更新变化了的部分。
 
-1. 一个简单的例子，演示如何使用
+为了跟踪变化，React引入了Element（Virtual DOM或者vDOM或者虚拟DOM）的概念。且在每次渲染时保留完整的vDOM。并在更新时比较本次生成的vDOM与上次的差异，这个过程叫做diff。然后根据差异对已有DOM作修改，这个过程叫patch（可参考git的diff&patch加深理解）。
+
+我们对照React的例子来逐步构建TinyReact。
+
+## 一个简单的例子，演示我们是如何使用TinyReact的
+
+在React中，如果不用jsx，一般写法是这样
+
+```javascript
+ReactDOM.render(React.createElement('div', {}, 'Hello TinyReact'), document.getElementById('app'))
 ```
+
+在TinyReact中，`renderDOM()`对应`ReactDOM.render()`，`createVDOM()`对应`React.createElement()`
+
+```javascript
 renderDOM(createVDOM('div', {}, 'Hello VDOM'), document.getElementById('app'))
 ```
-`renderDOM()`对应`ReactDOM.render()`，`createVDOM()`对应`React.createElement()`
-2. vDOM和`createVDOM(...)`
-```
+
+## `createVDOM(...)`
+
+`createVDOM(...)`会够建一个Plain Object。
+
+```javascript
 function createVDOM(tag, props, ...children) {
     return {
         tag,
         props,
-        children
+        children // 递归结构
     }
 }
 ```
-```
+
+我们的html（DOM）通常是多层嵌套的，所以vDOM通常也是一个递归结构，如：
+
+```javascript
 {
-    "tag": "div",
-    "props": {
-        "className": "form"
-    },
-    "children": [
+  "tag": "div",
+  "props": {className: 'root'},
+  "children": [
+    {
+      "tag": "div",
+      "props": {className: 'inner'},
+      "children": [
         {
-            "tag": "input",
-            "props": {
-                "value": "world"
-            },
-            "children": []
+          "tag": "input",
+          "props": {},
+          "children": []
         },
-        {
-            "tag": "div",
-            "props": {},
-            "children": [
-                "Hello world"
-            ]
-        }
-    ]
+      ]
+    }
+  ]
 }
 ```
-3. `renderDOM(nextVDOM, parent)`
-```
-function renderDOM(nextVDOM, parent) {
-    let prevVDOM = parent._vDOM
-    let patches = diff(prevVDOM, nextVDOM, parent)
+
+## `renderDOM(nextVDOM, parent)`
+
+将vDOM渲染到rootDOM节点下。
+
+```javascript
+function renderDOM(nextVDOM, rootDOM) {
+    let prevVDOM = rootDOM._vDOM
+    rootDOM._vDOM = nextVDOM                                   // 将新的vDOM保存下来
+    let patches = diff(prevVDOM, nextVDOM, rootDOM)
+    console.log(patches) // Show what patches will be applied
     patch(patches)
 }
 ```
-4. `diff(prevVDOM, nextVDOM, parent)`
-只比较当前层，基于React的两个假设
-```
+
+参照以上代码
+
+- 初次访问`renderDOM()`，prevVDOM为空，会根据nextVDOM创建整个DOM Tree。
+- 再次访问`renderDOM()`，prevVDOM为之前的vDOM，会根据`diff()`的结果做增量更新(patch)。
+
+## `diff(prevVDOM, nextVDOM, parent)`
+
+完整比较两棵树的时间复杂度为O(n3)。实际上这在前端是不可接受的。
+
+React基于以下两个`假设`（assumptions）将复杂度降低到了O(n)。
+
+> 1. Two components of the same class will generate similar trees and two components of different classes will generate different trees.
+> 2. It is possible to provide a unique key for elements that is stable across different renders.
+
+根据第一个假设，只需要逐层比较，不用比较不同层级。如果标签（tag）不同，就会新建DOM并替换掉旧的DOM。
+*我们暂时不考虑第二个假设。为了简化问题，我们假设各元素在数组中的位置不会发生变化*
+
+```javascript
 function diff(prevVDOM, nextVDOM, parent) {
-    if (prevVDOM) {
-        nextVDOM._dom = prevVDOM._dom
-    }
+  if (prevVDOM && nextVDOM) {
+    nextVDOM._dom = prevVDOM._dom
+  }
 
-    parent._vDOM = nextVDOM
-
-    let diffs = []
-
-    let info = {
-        prevVDOM,
-        nextVDOM,
-        parent
-    }
-
-    if (!prevVDOM) {
-        diffs.push({
-            ...info,
-            type: 'create'
-        })
-    } else if (!nextVDOM) {
-        diffs.push({
-            ...info,
-            type: 'remove'
-        })
-    } else if (isPlainObject(prevVDOM) && isPlainObject(nextVDOM)) {
-        if (prevVDOM.tag === nextVDOM.tag) {
-            diffs = diffs.concat(diffProps(prevVDOM.props, nextVDOM.props, prevVDOM._dom))
-
-            prevVDOM.children.forEach((prevChild, index) => {
-                let nextChild = nextVDOM.children[index]
-                diffs = diffs.concat(diff(prevChild, nextChild, prevVDOM._dom))
-            })
-        } else {
-            diffs.push({
-                ...info,
-                type: 'update'
-            })
-        }
+  let diffs = []
+  if (!prevVDOM) {
+    diffs.push({type: 'create', prevVDOM, nextVDOM, parent})
+  } else if (!nextVDOM) {
+    diffs.push({type: 'remove', prevVDOM, nextVDOM, parent})
+  } else if (isPlainObject(prevVDOM) && isPlainObject(nextVDOM)) {
+    if (prevVDOM.tag === nextVDOM.tag) {
+      ...
     } else {
-        diffs.push({
-            ...info,
-            type: 'update'
-        })
+      diffs.push({type: 'update', prevVDOM, nextVDOM, parent})
+    }
+  } else if (prevVDOM !== nextVDOM) {
+    diffs.push({type: 'update', prevVDOM, nextVDOM, parent})
+  }
+
+  return diffs
+}
+```
+
+`diff()`会返回一个patch对象数组，用以表示有哪些变动。patch对象结构如下：
+
+```javascript
+{
+  type,
+  prevVDOM,
+  nextVDOM,
+  parent
+}
+```
+
+## 属性值变化
+
+标签（tag）相同的情况下，比较属性值是否有变化
+
+```javascript
+diffs = diffs.concat(diffProps(prevVDOM.props, nextVDOM.props, prevVDOM._dom))
+```
+
+```javascript
+function diffProps(prevProps = [], nextProps = [], dom) {
+  return Object.keys(prevProps).reduce((diffs, key) => {
+    if (prevProps[key] !== nextProps[key]) {
+      diffs.push({
+        dom,
+        key,
+        value: nextProps[key],
+        type: 'updateProp'
+      })
     }
 
     return diffs
+  }, [])
 }
 ```
-5. `patch(patches)`
+
+该部分返回的patch略有不同。
+
+## 子节点（children）变化
+
+标签（tag）相同的情况下，要检测子节点（children）的变化。
+
+为了简化问题，我们假设各元素在数组中的位置不会发生变化。
+
+```javascript
+let checkedIndex = -1
+;(prevVDOM.children || []).forEach((prevChild, index) => {
+  checkedIndex = index
+  let nextChild = (nextVDOM.children || [])[index]
+  diffs = diffs.concat(diff(prevChild, nextChild, prevVDOM._dom))
+})
+
+;(nextVDOM.children || []).forEach((nextChild, index) => {
+  if (checkedIndex >= index) return
+  let prevChild = (prevVDOM.children || [])[index]
+  diffs = diffs.concat(diff(prevChild, nextChild, prevVDOM._dom))
+})
 ```
+
+可以发现这里递归调用了`diff()`，这样一次遍历完整个vDOM Tree就可以得到所有的patches。
+
+## `patch(patches)`增量更新
+
+```javascript
 function patch(patches) {
-    patches.forEach(patch => {
-        let {prevVDOM, nextVDOM, parent} = patch
-        if (patch.type === 'create') {
-            let dom = createDOM(nextVDOM)
-            parent.appendChild(dom)
-        } else if (patch.type === 'remove') {
-            parent.removeChild(prevVDOM._dom)
-        } else if (patch.type === 'update') {
-            let dom = createDOM(nextVDOM)
-            parent.replaceChild(dom, prevVDOM._dom)
-        }
-
-        ...
-    })
-}
-
-function createDOM(vdom) {
-    let dom = null
-    if (isPlainObject(vdom)) {
-        let {tag, props, children} = vdom
-        dom = document.createElement(tag)
-        Object.keys(props).forEach(key => {
-            dom[key] = props[key]
-        })
-
-        children.forEach(child => {
-            dom.appendChild(createDOM(child))
-        })
-    } else {
-        dom = document.createTextNode(vdom)
+  patches.forEach(patch => {
+    let {prevVDOM, nextVDOM, parent} = patch
+    if (patch.type === 'create') {            // 创建新的DOM对象，并添加
+      let dom = createDOM(nextVDOM)
+      parent.appendChild(dom)
+    } else if (patch.type === 'remove') {     // 直接移除DOM
+      parent.removeChild(prevVDOM._dom)
+    } else if (patch.type === 'update') {     // 创建新DOM并替换
+      let dom = createDOM(nextVDOM)
+      parent.replaceChild(dom, prevVDOM._dom)
+    } else if (patch.type === 'updateProp') { // 属性修改
+      patch.dom[patch.key] = patch.value
     }
-
-    vdom._dom = dom
-
-    return dom
+  })
 }
 ```
+
+有两种类型的DOM，一种是用Plain Object表示的vDOM，另一种是string表示的文本节点。
+
+```javascript
+function createDOM(vdom) {
+  let dom = null
+  if (isPlainObject(vdom)) {
+    let {tag, props = {}, children = []} = vdom
+    dom = document.createElement(tag)
+    children.forEach(child => {
+      dom.appendChild(createDOM(child))  // 递归创建子节点
+    })
+
+    Object.keys(props).forEach(key => {
+      dom[key] = props[key]
+    })
+  } else {
+    dom = document.createTextNode(vdom)
+  }
+
+  vdom._dom = dom
+
+  return dom
+}
+```
+
+完整的代码在[index.js](./index.js)，也可以查看example.html。
+
+## 结束语
+
+欢迎各种PR和Issue。
 

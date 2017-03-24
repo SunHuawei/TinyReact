@@ -9,10 +9,10 @@ function createVDOM(tag, props, ...children) {
   }
 }
 
-function renderDOM(nextVDOM, parent) {
-  let prevVDOM = parent._vDOM
-  parent._vDOM = nextVDOM
-  let patches = diff(prevVDOM, nextVDOM, parent)
+function renderDOM(nextVDOM, rootDOM) {
+  let prevVDOM = rootDOM._vDOM
+  rootDOM._vDOM = nextVDOM
+  let patches = diff(prevVDOM, nextVDOM, rootDOM)
   console.log(patches) // Show what patches will be applied
   patch(patches)
 }
