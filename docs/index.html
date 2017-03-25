@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>A tiny react-like lib, aim to understand how react works</title>
+    <link rel="stylesheet" type="text/css" href="https://facebook.github.io/react/css/react.css"/>
+    <link rel="stylesheet" type="text/css" href="css/prism.css"/>
+    <style>
+    #examples pre {
+      margin: 0 0 25px 0;
+      max-width: 600px;
+    }
+
+    #examples p {
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    input {
+      border: 1px solid #ddd;
+      padding: 5px 10px;
+    }
+
+    .form.invalid input {
+      background-color: rgba(255, 0, 0, .4);
+    }
+
+    .warn {
+      color: rgba(255, 0, 0, .6);
+    }
+
+    .hero .subtitle {
+      font-size: 18px;
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    .buttons-unit {
+      margin-top: 40px;
+    }
+
+    .buttons-unit .button {
+      font-size: 20px;
+    }
+    </style>
+  </head>
+  <body>
+    <div class="nav-main">
+      <div class="wrap">
+        <a class="nav-home" href="https://github.com/SunHuawei/TinyReact">
+          TinyReact
+        </a>
+        <div class="nav-lists">
+          <ul class="nav-site nav-site-external">
+            <li><a href="https://github.com/SunHuawei/TinyReact">GitHub</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="container">
+      <div class="hero">
+        <div class="wrap">
+          <div class="text"><strong>TinyReact</strong></div>
+          <div class="subtitle">
+            一个极小的React-like库，用来演示React的工作原理
+          </div>
+          <div class="buttons-unit">
+            <a href="https://github.com/SunHuawei/TinyReact" class="button">有意思，看看它是怎么实现的</a>
+          </div>
+        </div>
+      </div>
+      <section class="content wrap">
+        <hr class="home-divider" />
+        <section class="home-section">
+          <div id="examples">
+            <div class="example">
+              <h3>简单输出</h3>
+              <p>
+                在TinyReact中，<code>renderDOM()</code>对应<code>ReactDOM.render()</code>，<code>createVDOM()</code>对应<code>React.createElement()</code>
+              </p>
+              <div>
+                <div id="helloExample" class="playgroundPreview">
+                </div>
+                <pre><code class="language-javascript">var rootDom = document.getElementById('helloExample')
+renderDOM(createVDOM('div', {}, 'Hello TinyReact'), rootDom)</code></pre>
+              </div>
+            </div>
+            <div class="example">
+              <h3>Controlled Input／事件绑定</h3>
+              <p>
+                该例子展示了一个Controlled Input和事件绑定的例子。在输入框中每输入一个字符，都会触发一次<code>rerender()</code>。由于TinyReact的增量更新，它只会更新数据变化了的部分。你可以打开Dev-tools查看有哪些变化导致的patches。
+              </p>
+              <p>
+                另外注意，在TinyReact中，会将所有props直接赋值给最终DOM，所以绑定事件的写法与DOM操作接口一致，如value、oninput等。
+              </p>
+              <div>
+                <div id="eventExample" class="playgroundPreview"></div>
+                </div>
+                <pre><code class="language-javascript">let app = document.getElementById('eventExample')
+let name = 'TinyReact'
+
+let onInput = (e) => {
+  name = e.target.value
+  rerender()
+}
+
+function rerender() {
+  renderDOM(
+    createVDOM(
+      'div',
+      {},
+      createVDOM(
+        'input',
+        {
+          value: name,
+          oninput: onInput
+        }
+      ),
+      createVDOM('div', {}, name, ' is wonderful')
+    ),
+    app
+  )
+}
+
+rerender()</code></pre>
+              </div>
+            </div>
+          </div>
+        </section>
+        <hr class="home-divider" />
+        <section class="home-bottom-section">
+          <div class="buttons-unit">
+            <a href="https://github.com/SunHuawei/TinyReact" class="button">有意思，看看它是怎么实现的</a>
+            <a href="https://github.com/SunHuawei/TinyReact/blob/master/index.js" class="button">查看仅有120行的源代码</a>
+          </div>
+        </section>
+      </section>
+    </div>
+  </body>
+  <script src="js/prism.js"></script>
+  <script src='https://rawgit.com/SunHuawei/TinyReact/master/index.js'></script>
+  <script>
+    (function() {
+      // Hello Example
+      renderDOM(createVDOM('div', {}, 'Hello TinyReact'), document.getElementById('helloExample'))
+    })();
+
+    (function() {
+      // Event Example
+      let app = document.getElementById('eventExample')
+      let name = 'TinyReact'
+
+      let onInput = (e) => {
+        name = e.target.value
+        rerender()
+      }
+
+      function rerender() {
+        renderDOM(
+          createVDOM(
+            'div',
+            {},
+            createVDOM(
+              'input',
+              {
+                value: name,
+                oninput: onInput
+              }
+            ),
+            createVDOM('div', {}, name, ' is wonderful')
+          ),
+          app
+        )
+      }
+
+      rerender()
+    })();
+
+  </script>
+</html>

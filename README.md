@@ -1,10 +1,14 @@
-TinyReact是一个React-like库，旨在学习和理解React，并对vDOM有一个完整的认识。
+TinyReact是一个极小的React-like库，用来演示React的工作原理。
 
 TinyReact绝大部分思路来源于[Building Your Own React Clone in Five Easy Steps](https://blog.javascripting.com/2016/10/05/building-your-own-react-clone-in-five-easy-steps/)。实现上略有区别。
 
+[Demo看这里](https://sunhuawei.github.io/TinyReact/)
+
 ## 前言
 
-React的核心概念是增量更新。也就是说在初始化时会构建整个DOM Tree。之后如果有任何数据变化时，只需要更新变化了的部分。
+由于React要兼顾各种场景，其代码难免难以阅读。本文逐步构建TinyReact，用以演示React的核心概念vDOM和vDOM diff。
+
+React的核心本质上是增量更新。也就是说在初始化时会构建整个DOM Tree。之后如果有任何数据变化时，只需要更新变化了的部分。
 
 为了跟踪变化，React引入了Element（Virtual DOM或者vDOM或者虚拟DOM）的概念。且在每次渲染时保留完整的vDOM。并在更新时比较本次生成的vDOM与上次的差异，这个过程叫做diff。然后根据差异对已有DOM作修改，这个过程叫patch（可参考git的diff&patch加深理解）。
 
@@ -21,7 +25,7 @@ ReactDOM.render(React.createElement('div', {}, 'Hello TinyReact'), document.getE
 在TinyReact中，`renderDOM()`对应`ReactDOM.render()`，`createVDOM()`对应`React.createElement()`
 
 ```javascript
-renderDOM(createVDOM('div', {}, 'Hello VDOM'), document.getElementById('app'))
+renderDOM(createVDOM('div', {}, 'Hello TinyReact'), document.getElementById('app'))
 ```
 
 ## `createVDOM(...)`
@@ -223,9 +227,11 @@ function createDOM(vdom) {
 }
 ```
 
-完整的代码在[index.js](./index.js)，也可以查看example.html。
+完整的代码在[index.js](./index.js)，也可以查看这个[Demo](https://sunhuawei.github.io/TinyReact/)。
 
 ## 结束语
+
+这是一个极其简化的实现，只是为了演示主要流程，很多问题并没有考虑。进一步建议阅读[preact](https://github.com/developit/preact)及[inferno](https://github.com/infernojs/inferno)的源码，这两个库相对React来说还是简单不少。
 
 欢迎各种PR和Issue。
 

@@ -13,7 +13,7 @@ function renderDOM(nextVDOM, rootDOM) {
   let prevVDOM = rootDOM._vDOM
   rootDOM._vDOM = nextVDOM
   let patches = diff(prevVDOM, nextVDOM, rootDOM)
-  console.log(patches) // Show what patches will be applied
+  console.log('> Patches', patches) // Show what patches will be applied
   patch(patches)
 }
 

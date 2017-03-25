@@ -1,7 +1,7 @@
 {
   "name": "tiny-react",
   "version": "0.0.2",
-  "description": "A tiny react-like lib, aim to understand how react works",
+  "description": "一个极小的React-like库，用来演示React的工作原理",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
