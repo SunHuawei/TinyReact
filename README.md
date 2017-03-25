@@ -6,7 +6,7 @@ TinyReact绝大部分思路来源于[Building Your Own React Clone in Five Easy 
 
 ## 前言
 
-由于React要兼顾各种场景，其代码难免难以阅读。本文以**仅120行代码**演示React的核心概念vDOM和vDOM diff。
+由于React要兼顾各种场景，其代码难免难以阅读。本文以**仅120行源代码的库TinyReact**演示React的核心概念vDOM和vDOM diff。
 
 ## 原理
 
