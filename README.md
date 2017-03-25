@@ -6,7 +6,9 @@ TinyReact绝大部分思路来源于[Building Your Own React Clone in Five Easy 
 
 ## 前言
 
-由于React要兼顾各种场景，其代码难免难以阅读。本文逐步构建TinyReact，用以演示React的核心概念vDOM和vDOM diff。
+由于React要兼顾各种场景，其代码难免难以阅读。本文以**仅120行代码**演示React的核心概念vDOM和vDOM diff。
+
+## 原理
 
 React的核心本质上是增量更新。也就是说在初始化时会构建整个DOM Tree。之后如果有任何数据变化时，只需要更新变化了的部分。
 
