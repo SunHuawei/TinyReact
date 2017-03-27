@@ -1,6 +1,6 @@
 {
   "name": "tiny-react",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "一个极小的React-like库，用来演示React的工作原理",
   "main": "index.js",
   "scripts": {
