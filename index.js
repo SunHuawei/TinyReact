@@ -2,10 +2,16 @@ function createVDOM(tag, props, ...children) {
   return {
     tag,
     props,
-    children: children.map(child =>  {
-      // string => String Object
-      return isPlainObject(child) ? child: new String(child)
-    })
+    children: children.reduce((array, child) =>  {
+      if (Array.isArray(child)) {
+        array = array.concat(child)
+      } else {
+        // string => String Object
+        array.push(isPlainObject(child) ? child: new String(child))
+      }
+
+      return array
+    }, [])
   }
 }
 
@@ -98,11 +104,11 @@ function createDOM(vdom) {
   if (isPlainObject(vdom)) {
     let {tag, props = {}, children = []} = vdom
     dom = document.createElement(tag)
-    children.forEach(child => {
+    ;(children || []).forEach(child => {
       dom.appendChild(createDOM(child))
     })
 
-    Object.keys(props).forEach(key => {
+    Object.keys(props || []).forEach(key => {
       dom[key] = props[key]
     })
   } else {
